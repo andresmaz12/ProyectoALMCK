@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista de Base de Datos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            padding: 40px;
+            color: #333;
+        }
+        .main-container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .header-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        .search-box {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px; /* Estilo redondeado moderno */
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-box:focus { border-color: #3498db; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+            text-align: left;
+            padding: 12px;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover { background-color: #f9f9f9; }
+
+        /* Etiquetas de estado o categoría */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            background-color: #e1f5fe;
+            color: #0288d1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <h2>Inventario de Productos</h2>
+
+    <div class="header-tools">
+        <input type="text" class="search-box" placeholder="Buscar por nombre, categoría o código...">
+        <button style="padding: 10px 20px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer;">
+            Buscar
+        </button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Stock</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>#001</td>
+                <td>Crema Victoria Secret</td>
+                <td><span class="badge">Maquillaje</span></td>
+                <td>20 unidades/td>
+                <td>Q350.00</td>
+                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
+            </tr>
+            <tr>
+                <td>#002</td>
+                <td>Pachon Disney</td>
+                <td><span class="badge">Tupper</span></td>
+                <td>12 unidades</td>
+                <td>Q180.00</td>
+                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
+            </tr>
+            <tr>
+                <td>#003</td>
+                <td>Gloss Elf</td>
+                <td><span class="badge">Maquillaje</span></td>
+                <td>8 unidades</td>
+                <td>Q210.00</td>
+                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<button class="button", with="100">
+    <a href="../inventario.html"> Salir </a>
+</button>
+</body>
+</html>
