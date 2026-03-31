@@ -1,122 +1,325 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vista de Base de Datos</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            padding: 40px;
-            color: #333;
-        }
-        .main-container {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .header-tools {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 15px;
-        }
-        .search-box {
-            flex-grow: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 25px; /* Estilo redondeado moderno */
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .search-box:focus { border-color: #3498db; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th {
-            background-color: #34495e;
-            color: white;
-            text-align: left;
-            padding: 12px;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        tr:hover { background-color: #f9f9f9; }
-
-        /* Etiquetas de estado o categoría */
-        .badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            background-color: #e1f5fe;
-            color: #0288d1;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultar Inventario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .container h1 {
+      margin-bottom: 1.5rem;
+    }
+    .search-bar {
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    .search-bar button {
+      padding: 0.75rem 1.5rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+    .search-bar button:hover {
+      background: #2563eb;
+    }
+    .productos-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .productos-table th,
+    .productos-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .productos-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #333;
+    }
+    .productos-table tr:hover {
+      background: #f8f9fa;
+    }
+    .btn-eliminar {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      transition: background 0.3s;
+    }
+    .btn-eliminar:hover {
+      background: #dc2626;
+    }
+    .btn-editar {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-editar:hover {
+      background: #059669;
+    }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      font-size: 1.2rem;
+      color: #666;
+    }
+    .disponible-true {
+      color: #10b981;
+      font-weight: 500;
+    }
+    .disponible-false {
+      color: #ef4444;
+      font-weight: 500;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      background: white;
+      border-radius: 8px;
+      color: #666;
+    }
+    .stats {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .tipo-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: #e5e7eb;
+      border-radius: 20px;
+      font-size: 0.85rem;
+    }
+  </style>
 </head>
 <body>
-
-<div class="main-container">
-    <h2>Inventario de Productos</h2>
-
-    <div class="header-tools">
-        <input type="text" class="search-box" placeholder="Buscar por nombre, categoría o código...">
-        <button style="padding: 10px 20px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer;">
-            Buscar
-        </button>
+  <header class="header">
+    <div class="logo-box">
+      <img src="../../recursos/logoALMCK.jpeg" width="100" alt="Logo">
     </div>
+  </header>
 
-    <table>
-        <thead>
-            <tr>
+  <main>
+    <div class="container">
+      <h1>📋 Inventario de Productos</h1>
+      
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre..." autocomplete="off">
+        <button onclick="buscarProductos()">Buscar</button>
+        <button onclick="cargarTodos()">Mostrar Todos</button>
+      </div>
+
+      <div id="productosList">
+        <div class="loading">Cargando productos...</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <button class="info-pill" onclick="window.location.href='../inventario.html'">
+      ← Regresar
+    </button>
+  </footer>
+
+  <script type="module">
+    import { supabase, testSupabaseConnection } from '../../supabaseClient.js';
+
+    // Función para formatear moneda
+    function formatPrice(price) {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN'
+      }).format(price);
+    }
+
+    // Función para obtener el emoji del tipo
+    function getTipoEmoji(tipo) {
+      const emojis = {
+        'Ropa niño': '👕',
+        'Ropa niña': '👗',
+        'Ropa hombre': '👔',
+        'Ropa mujer': '💃',
+        'Perfumes': '🌸',
+        'Alimento': '🍎',
+        'Reloj': '⌚',
+        'Maquillaje': '💄'
+      };
+      return emojis[tipo] || '📦';
+    }
+
+    // Función para eliminar producto
+    window.eliminarProducto = async function(id, nombre) {
+      if (confirm(`¿Estás seguro de eliminar "${nombre}"?`)) {
+        const { error } = await supabase
+          .from('productos')
+          .delete()
+          .eq('ProductoID', id);
+
+        if (error) {
+          alert('Error al eliminar: ' + error.message);
+        } else {
+          alert('✅ Producto eliminado exitosamente');
+          await cargarProductos();
+        }
+      }
+    };
+
+    // Función para buscar productos
+    window.buscarProductos = async function() {
+      const searchTerm = document.getElementById('searchInput').value;
+      await cargarProductos(searchTerm);
+    };
+
+    // Función para cargar todos
+    window.cargarTodos = async function() {
+      document.getElementById('searchInput').value = '';
+      await cargarProductos();
+    };
+
+    // Función principal para cargar productos
+    async function cargarProductos(searchTerm = '') {
+      const container = document.getElementById('productosList');
+      container.innerHTML = '<div class="loading">⏳ Cargando productos...</div>';
+
+      try {
+        let query = supabase.from('productos').select('*');
+
+        if (searchTerm) {
+          query = query.ilike('NombreProducto', `%${searchTerm}%`);
+        }
+
+        const { data, error } = await query.order('ProductoID', { ascending: false });
+
+        if (error) {
+          container.innerHTML = `<div class="loading">❌ Error: ${error.message}</div>`;
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              📦 No hay productos registrados
+              <br><br>
+              <button class="btn-editar" onclick="window.location.href='agregarProducto.html'">
+                ➕ Agregar Producto
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        // Mostrar estadísticas
+        const totalProductos = data.length;
+        const totalCantidad = data.reduce((sum, p) => sum + p.Cantidad, 0);
+        const valorInventario = data.reduce((sum, p) => sum + (p.Precio * p.Cantidad), 0);
+
+        const html = `
+          <div class="stats">
+            📊 Total productos: ${totalProductos} | 
+            📦 Unidades: ${totalCantidad} | 
+            💰 Valor: ${formatPrice(valorInventario)}
+          </div>
+          <table class="productos-table">
+            <thead>
+              <tr>
                 <th>ID</th>
                 <th>Producto</th>
-                <th>Categoría</th>
-                <th>Stock</th>
+                <th>Cantidad</th>
+                <th>Tipo</th>
                 <th>Precio</th>
+                <th>Caducidad</th>
+                <th>Disponible</th>
                 <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>#001</td>
-                <td>Crema Victoria Secret</td>
-                <td><span class="badge">Maquillaje</span></td>
-                <td>20 unidades/td>
-                <td>Q350.00</td>
-                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
-            </tr>
-            <tr>
-                <td>#002</td>
-                <td>Pachon Disney</td>
-                <td><span class="badge">Tupper</span></td>
-                <td>12 unidades</td>
-                <td>Q180.00</td>
-                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
-            </tr>
-            <tr>
-                <td>#003</td>
-                <td>Gloss Elf</td>
-                <td><span class="badge">Maquillaje</span></td>
-                <td>8 unidades</td>
-                <td>Q210.00</td>
-                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(producto => `
+                <tr>
+                  <td>${producto.ProductoID}</td>
+                  <td><strong>${escapeHtml(producto.NombreProducto)}</strong></td>
+                  <td>${producto.Cantidad}</td>
+                  <td>
+                    <span class="tipo-badge">
+                      ${getTipoEmoji(producto.TipoProducto)} ${escapeHtml(producto.TipoProducto)}
+                    </span>
+                  </td>
+                  <td>${formatPrice(producto.Precio)}</td>
+                  <td>${producto.Caducidad || 'N/A'}</td>
+                  <td class="disponible-${producto.Disponible}">
+                    ${producto.Disponible ? '✓ Disponible' : '✗ No disponible'}
+                  </td>
+                  <td>
+                    <button class="btn-editar" onclick="window.location.href='modificarProducto.html?id=${producto.ProductoID}'">
+                      ✏️ Editar
+                    </button>
+                    <button class="btn-eliminar" onclick="eliminarProducto(${producto.ProductoID}, '${escapeHtml(producto.NombreProducto)}')">
+                      🗑️ Eliminar
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+        
+        container.innerHTML = html;
+      } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML = '<div class="loading">❌ Error de conexión con la base de datos</div>';
+      }
+    }
 
-<button class="button", with="100">
-    <a href="../inventario.html"> Salir </a>
-</button>
+    // Función para prevenir XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Cargar todos al inicio
+    cargarProductos();
+
+    // Permitir búsqueda con Enter
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        buscarProductos();
+      }
+    });
+  </script>
 </body>
 </html>
