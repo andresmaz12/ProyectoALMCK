@@ -1,89 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Registro de Inventario</title>
-        <style>
-            body {
-                font-family: sans-serif;
-                display: flex;
-                justify-content: center;
-                padding: 40px;
-                background-color: #f4f4f9;
-            }
-            .container {
-                background: white;
-                padding: 25px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                width: 100%;
-                max-width: 400px;
-            }
-            h2 { text-align: center; color: #333; }
-            .form-group { margin-bottom: 15px; }
-            label { display: block; margin-bottom: 5px; font-weight: bold; }
-            input, select, textarea {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                box-sizing: border-box; /* Evita que el padding afecte el ancho */
-            }
-            button {
-                width: 100%;
-                padding: 12px;
-                background-color: #2ecc71;
-                border: none;
-                color: white;
-                font-size: 16px;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-            button:hover { background-color: #27ae60; }
-        </style>
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Inventario</title>
+    <link rel="stylesheet" href="estiloInventario.css">
+</head>
+<body>
 
-        <div class="container">
-            <h2>Nuevo Registro</h2>
-            <form action="#" method="POST">
-                
-                <div class="form-group">
-                    <label for="nombre">Nombre del Producto:</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Ej: New York Steak" required>
-                </div>
+    <div class="container">
+        <h2>Nuevo Registro</h2>
+        <form action="#" method="POST">
 
-                <div class="form-group">
-                    <label for="categoria">Categoría:</label>
-                    <select id="categoria" name="categoria">
-                        <option value="carnes">Carnes</option>
-                        <option value="embutidos">Embutidos</option>
-                        <option value="lacteos">Lácteos</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="nombre">Nombre del Producto</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ej: Crema Para la Piel" required>
+            </div>
 
-                <div class="form-group">
-                    <label for="precio">Precio Unitario:</label>
-                    <input type="number" id="precio" name="precio" step="0.01" placeholder="0.00">
-                </div>
+            <div class="form-group">
+                <label for="categoria">Categoría</label>
+                <select id="categoria" name="categoria">
+                    <option value="carnes">Maquillaje</option>
+                    <option value="embutidos">Pachones</option>
+                    <option value="lacteos">Ropa</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label for="stock">Cantidad en Stock:</label>
-                    <input type="number" id="stock" name="stock">
-                </div>
+            <div class="form-group">
+                <label for="precio">Precio Unitario</label>
+                <input type="number" id="precio" name="precio" step="0.01" placeholder="0.00">
+            </div>
 
-                <div class="form-group">
-                    <label for="notas">Notas adicionales:</label>
-                    <textarea id="notas" name="notas" rows="3"></textarea>
-                </div>
+            <div class="form-group">
+                <label for="stock">Cantidad en Stock</label>
+                <input type="number" id="stock" name="stock">
+            </div>
 
-                <button type="submit">Guardar en Base de Datos</button>
-            </form>
-        </div>
+            <div class="form-group">
+                <label for="notas">Notas adicionales</label>
+                <textarea id="notas" name="notas" rows="3"></textarea>
+            </div>
 
-        <button class="button">
-            <a href="../inventario.html"> Salir</a>
-        </button>
-    </body>
+            <button type="submit">Guardar en Base de Datos</button>
+        </form>
+    </div>
+
+    <a class="btn-salir" href="../inventario.html">Salir</a>
+
+</body>
 </html>

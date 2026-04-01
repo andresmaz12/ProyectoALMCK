@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Producto</title>
+    <link rel="stylesheet" href="estiloInventario.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>Modificar Producto</h2>
+
+        <form action="#" method="POST">
+
+            <!-- ID solo lectura -->
+            <div class="form-group">
+                <label for="id">ID del Producto</label>
+                <span class="id-badge" id="id">#001</span>
+                <input type="hidden" name="id" value="001">
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">Nombre del Producto</label>
+                <input type="text" id="nombre" name="nombre"
+                       value="Crema Victoria Secret" required>
+            </div>
+
+            <div class="form-group">
+                <label for="categoria">Categoría</label>
+                <select id="categoria" name="categoria">
+                    <option value="maquillaje" selected>Maquillaje</option>
+                    <option value="tupper">Tupper</option>
+                    <option value="accesorios">Accesorios</option>
+                    <option value="otros">Otros</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="precio">Precio Unitario (Q)</label>
+                <input type="number" id="precio" name="precio"
+                       step="0.01" value="350.00">
+            </div>
+
+            <div class="form-group">
+                <label for="stock">Cantidad en Stock</label>
+                <input type="number" id="stock" name="stock" value="20">
+            </div>
+
+            <div class="form-group">
+                <label for="notas">Notas adicionales</label>
+                <textarea id="notas" name="notas" rows="3">Producto importado. Verificar fecha de vencimiento al recibir.</textarea>
+            </div>
+
+            <button type="submit">Guardar Cambios</button>
+
+            <!-- Zona de peligro -->
+            <div class="danger-zone">
+                <p>Zona de peligro</p>
+                <button type="button" class="btn-danger"
+                        onclick="confirmarEliminar()">
+                    Eliminar Producto
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <a class="btn-salir" href="consultaInventario.html">Salir</a>
+
+    <script>
+        function confirmarEliminar() {
+            const nombre = document.getElementById('nombre').value;
+            const confirmado = confirm(
+                `¿Estás seguro de que deseas eliminar "${nombre}"?\nEsta acción no se puede deshacer.`
+            );
+            if (confirmado) {
+                // Aquí iría la lógica de eliminación (fetch/redirect)
+                alert(`Producto "${nombre}" eliminado.`);
+                window.location.href = 'consultaInventario.html';
+            }
+        }
+    </script>
+
+</body>
+</html>
