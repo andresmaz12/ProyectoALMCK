@@ -4,64 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vista de Base de Datos</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            padding: 40px;
-            color: #333;
-        }
-        .main-container {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .header-tools {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 15px;
-        }
-        .search-box {
-            flex-grow: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 25px; /* Estilo redondeado moderno */
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .search-box:focus { border-color: #3498db; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th {
-            background-color: #34495e;
-            color: white;
-            text-align: left;
-            padding: 12px;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        tr:hover { background-color: #f9f9f9; }
-
-        /* Etiquetas de estado o categoría */
-        .badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            background-color: #e1f5fe;
-            color: #0288d1;
-        }
-    </style>
+    <link rel="stylesheet" href="estiloInventario.css">
 </head>
 <body>
 
@@ -69,10 +12,9 @@
     <h2>Inventario de Productos</h2>
 
     <div class="header-tools">
-        <input type="text" class="search-box" placeholder="Buscar por nombre, categoría o código...">
-        <button style="padding: 10px 20px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer;">
-            Buscar
-        </button>
+        <input type="text" id="campoBusqueda" class="search-box"
+               placeholder="Buscar por nombre, categoría o código...">
+        <button class="btn-search" onclick="filtrarTabla()">Buscar</button>
     </div>
 
     <table>
@@ -86,37 +28,88 @@
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="cuerpoTabla">
             <tr>
-                <td>#001</td>
-                <td>Crema Victoria Secret</td>
-                <td><span class="badge">Maquillaje</span></td>
-                <td>20 unidades/td>
-                <td>Q350.00</td>
-                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
-            </tr>
-            <tr>
-                <td>#002</td>
-                <td>Pachon Disney</td>
-                <td><span class="badge">Tupper</span></td>
-                <td>12 unidades</td>
-                <td>Q180.00</td>
-                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
-            </tr>
-            <tr>
-                <td>#003</td>
-                <td>Gloss Elf</td>
-                <td><span class="badge">Maquillaje</span></td>
-                <td>8 unidades</td>
-                <td>Q210.00</td>
-                <td><a href="#" style="color: #3498db; text-decoration: none;">Editar</a></td>
+                <td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
+                    Cargando inventario...
+                </td>
             </tr>
         </tbody>
     </table>
 </div>
 
-<button class="button", with="100">
-    <a href="../inventario.html"> Salir </a>
-</button>
+<a class="btn-salir" href="../inventario.html">Regresar</a>
+
+<script src="db.js"></script>
+<script src="permisos.js"></script>
+<script>
+    const campoBusqueda = document.getElementById('campoBusqueda');
+    const cuerpoTabla   = document.getElementById('cuerpoTabla');
+
+    campoBusqueda.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') filtrarTabla();
+    });
+
+    function renderTabla(productos) {
+        if (productos.length === 0) {
+            cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
+                No se encontraron productos</td></tr>`;
+            return;
+        }
+
+        const puedeEditar = Permisos.puedeModificar();
+        const puedeEliminar = Permisos.puedeEliminar();
+
+        cuerpoTabla.innerHTML = productos.map(p => `
+            <tr>
+                <td>#${p.id}</td>
+                <td>${p.nombre}</td>
+                <td><span class="badge">${p.categoria}</span></td>
+                <td>${p.stock} unidades</td>
+                <td>Q${p.precio.toFixed(2)}</td>
+                <td class="acciones-celda">
+                    ${puedeEditar
+                        ? `<a href="modificarProducto.html?id=${p.id}" class="edit-link">Editar</a>`
+                        : `<span class="edit-link disabled" title="Sin permisos">Editar</span>`
+                    }
+                    ${puedeEliminar
+                        ? `<a href="#" class="delete-link" onclick="eliminarProducto('${p.id}', '${p.nombre}'); return false;">Eliminar</a>`
+                        : ''
+                    }
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function cargarInventario() {
+        DB.obtenerTodos().then(renderTabla);
+    }
+
+    function filtrarTabla() {
+        const termino = campoBusqueda.value.trim();
+        if (!termino) {
+            cargarInventario();
+            return;
+        }
+        DB.buscarPorTermino(termino).then(renderTabla);
+    }
+
+    function eliminarProducto(id, nombre) {
+        if (!Permisos.verificarOBloquear(Permisos.NIVELES.ELIMINAR, 'Eliminar Producto')) return;
+
+        const confirmado = confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`);
+        if (!confirmado) return;
+
+        DB.eliminarProducto(id).then(res => {
+            if (res.ok) {
+                alert(`Producto "${nombre}" eliminado.`);
+                cargarInventario();
+            }
+        });
+    }
+
+    cargarInventario();
+</script>
+
 </body>
 </html>

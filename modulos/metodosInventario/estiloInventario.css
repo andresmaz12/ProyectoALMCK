@@ -259,3 +259,77 @@ a.edit-link:hover { background: #dbeafe; }
 
 .btn-salir:hover::before { transform: translateX(-3px); }
 .btn-salir:active { transform: translateY(0); }
+
+/* ── ID Badge (modificarProducto) ── */
+.id-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: #dbeafe;
+  padding: 5px 14px;
+  border-radius: 999px;
+}
+
+/* ── Zona de peligro ── */
+.danger-zone {
+  margin-top: 28px;
+  padding: 18px;
+  border: 1.5px solid #fca5a5;
+  border-radius: var(--radius);
+  background: #fef2f2;
+}
+
+.danger-zone p {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #b91c1c;
+  margin-bottom: 12px;
+}
+
+.btn-danger {
+  padding: 10px 20px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-danger:hover { background: #b91c1c; }
+.btn-danger:active { transform: scale(0.97); }
+
+/* ── Link eliminar en tabla ── */
+a.delete-link {
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+  margin-left: 6px;
+}
+
+a.delete-link:hover { background: #fee2e2; }
+
+/* ── Celda de acciones ── */
+.acciones-celda {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* ── Enlace deshabilitado ── */
+.edit-link.disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+  pointer-events: none;
+}

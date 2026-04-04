@@ -11,25 +11,23 @@
     <div class="container">
         <h2>Modificar Producto</h2>
 
-        <form action="#" method="POST">
+        <form id="formModificar" action="#" method="POST">
 
-            <!-- ID solo lectura -->
             <div class="form-group">
                 <label for="id">ID del Producto</label>
-                <span class="id-badge" id="id">#001</span>
-                <input type="hidden" name="id" value="001">
+                <span class="id-badge" id="idDisplay">—</span>
+                <input type="hidden" id="productoId" name="id" value="">
             </div>
 
             <div class="form-group">
                 <label for="nombre">Nombre del Producto</label>
-                <input type="text" id="nombre" name="nombre"
-                       value="Crema Victoria Secret" required>
+                <input type="text" id="nombre" name="nombre" required>
             </div>
 
             <div class="form-group">
                 <label for="categoria">Categoría</label>
                 <select id="categoria" name="categoria">
-                    <option value="maquillaje" selected>Maquillaje</option>
+                    <option value="maquillaje">Maquillaje</option>
                     <option value="tupper">Tupper</option>
                     <option value="accesorios">Accesorios</option>
                     <option value="otros">Otros</option>
@@ -38,27 +36,24 @@
 
             <div class="form-group">
                 <label for="precio">Precio Unitario (Q)</label>
-                <input type="number" id="precio" name="precio"
-                       step="0.01" value="350.00">
+                <input type="number" id="precio" name="precio" step="0.01">
             </div>
 
             <div class="form-group">
                 <label for="stock">Cantidad en Stock</label>
-                <input type="number" id="stock" name="stock" value="20">
+                <input type="number" id="stock" name="stock">
             </div>
 
             <div class="form-group">
                 <label for="notas">Notas adicionales</label>
-                <textarea id="notas" name="notas" rows="3">Producto importado. Verificar fecha de vencimiento al recibir.</textarea>
+                <textarea id="notas" name="notas" rows="3"></textarea>
             </div>
 
             <button type="submit">Guardar Cambios</button>
 
-            <!-- Zona de peligro -->
-            <div class="danger-zone">
+            <div class="danger-zone" id="zonaPeligro" style="display:none;">
                 <p>Zona de peligro</p>
-                <button type="button" class="btn-danger"
-                        onclick="confirmarEliminar()">
+                <button type="button" class="btn-danger" onclick="confirmarEliminar()">
                     Eliminar Producto
                 </button>
             </div>
@@ -66,19 +61,81 @@
         </form>
     </div>
 
-    <a class="btn-salir" href="consultaInventario.html">Salir</a>
+    <a class="btn-salir" href="consultaInventario.html">Regresar</a>
 
+    <script src="db.js"></script>
+    <script src="permisos.js"></script>
     <script>
+        const params = new URLSearchParams(window.location.search);
+        const idProducto = params.get('id');
+
+        if (!Permisos.puedeModificar()) {
+            Permisos.bloquearAccion('Modificar Producto');
+            window.location.href = '../inventario.html';
+        }
+
+        if (Permisos.puedeEliminar()) {
+            document.getElementById('zonaPeligro').style.display = '';
+        }
+
+        if (idProducto) {
+            DB.obtenerPorId(idProducto).then(p => {
+                if (!p) {
+                    alert('Producto no encontrado.');
+                    window.location.href = 'buscarProducto.html';
+                    return;
+                }
+                document.getElementById('idDisplay').textContent   = '#' + p.id;
+                document.getElementById('productoId').value         = p.id;
+                document.getElementById('nombre').value             = p.nombre;
+                document.getElementById('precio').value             = p.precio;
+                document.getElementById('stock').value              = p.stock;
+                document.getElementById('notas').value              = p.notas || '';
+
+                const selectCat = document.getElementById('categoria');
+                for (const opt of selectCat.options) {
+                    if (opt.value.toLowerCase() === p.categoria.toLowerCase()) {
+                        opt.selected = true;
+                        break;
+                    }
+                }
+            });
+        } else {
+            window.location.href = 'buscarProducto.html';
+        }
+
+        document.getElementById('formModificar').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const datos = {
+                nombre:    document.getElementById('nombre').value,
+                categoria: document.getElementById('categoria').value,
+                precio:    parseFloat(document.getElementById('precio').value),
+                stock:     parseInt(document.getElementById('stock').value, 10),
+                notas:     document.getElementById('notas').value,
+            };
+
+            DB.modificarProducto(idProducto, datos).then(res => {
+                if (res.ok) {
+                    alert('Producto modificado correctamente.');
+                    window.location.href = 'consultaInventario.html';
+                }
+            });
+        });
+
         function confirmarEliminar() {
+            if (!Permisos.verificarOBloquear(Permisos.NIVELES.ELIMINAR, 'Eliminar Producto')) return;
+
             const nombre = document.getElementById('nombre').value;
-            const confirmado = confirm(
-                `¿Estás seguro de que deseas eliminar "${nombre}"?\nEsta acción no se puede deshacer.`
-            );
-            if (confirmado) {
-                // Aquí iría la lógica de eliminación (fetch/redirect)
-                alert(`Producto "${nombre}" eliminado.`);
-                window.location.href = 'consultaInventario.html';
-            }
+            const confirmado = confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`);
+            if (!confirmado) return;
+
+            DB.eliminarProducto(idProducto).then(res => {
+                if (res.ok) {
+                    alert(`Producto "${nombre}" eliminado.`);
+                    window.location.href = 'consultaInventario.html';
+                }
+            });
         }
     </script>
 

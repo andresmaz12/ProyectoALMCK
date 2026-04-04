@@ -10,7 +10,7 @@
 
     <div class="container">
         <h2>Nuevo Registro</h2>
-        <form action="#" method="POST">
+        <form id="formAgregar" action="#" method="POST">
 
             <div class="form-group">
                 <label for="nombre">Nombre del Producto</label>
@@ -20,9 +20,9 @@
             <div class="form-group">
                 <label for="categoria">Categoría</label>
                 <select id="categoria" name="categoria">
-                    <option value="carnes">Maquillaje</option>
-                    <option value="embutidos">Pachones</option>
-                    <option value="lacteos">Ropa</option>
+                    <option value="maquillaje">Maquillaje</option>
+                    <option value="pachones">Pachones</option>
+                    <option value="ropa">Ropa</option>
                 </select>
             </div>
 
@@ -45,7 +45,35 @@
         </form>
     </div>
 
-    <a class="btn-salir" href="../inventario.html">Salir</a>
+    <a class="btn-salir" href="../inventario.html">Regresar</a>
+
+    <script src="db.js"></script>
+    <script src="permisos.js"></script>
+    <script>
+        if (!Permisos.puedeAgregar()) {
+            Permisos.bloquearAccion('Agregar Producto');
+            window.location.href = '../inventario.html';
+        }
+
+        document.getElementById('formAgregar').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const producto = {
+                nombre:    document.getElementById('nombre').value,
+                categoria: document.getElementById('categoria').value,
+                precio:    parseFloat(document.getElementById('precio').value),
+                stock:     parseInt(document.getElementById('stock').value, 10),
+                notas:     document.getElementById('notas').value,
+            };
+
+            DB.agregarProducto(producto).then(res => {
+                if (res.ok) {
+                    alert('Producto agregado correctamente.');
+                    window.location.href = '../inventario.html';
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
