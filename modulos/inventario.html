@@ -37,18 +37,45 @@
     <!-- MAIN ACTIONS -->
     <main class="main-content">
       <div class="actions-grid">
-        <button class="action-btn">Consulta inventario</button>
-        <button class="action-btn">Agregar Producto</button>
-        <button class="action-btn">Modificar Producto</button>
+
+        <button class="action-btn" onclick="irConsultar()">
+          Consultar Inventario
+        </button>
+
+        <button class="action-btn" onclick="irAgregar()">
+          Agregar Producto
+        </button>
+
+        <button class="action-btn" onclick="irModificar()">
+          Modificar Producto
+        </button>
       </div>
     </main>
 
-    <!-- FOOTER / INFO BAR -->
+    <!-- FOOTER -->
     <footer class="footer">
-        <button class="info-pill"> 
-            <a href="../index.html"> Regresar</a>
-        </button>
+        <a class="nav-pill nav-pill--back" href="../index.html">
+            <span class="nav-pill__icon">&#8592;</span>
+            Regresar
+        </a>
     </footer>
+
+    <script src="metodosInventario/permisos.js"></script>
+    <script>
+        function irConsultar() {
+            window.location.href = 'metodosInventario/consultaInventario.html';
+        }
+
+        function irAgregar() {
+            if (!Permisos.verificarOBloquear(Permisos.NIVELES.AGREGAR, 'Agregar Producto')) return;
+            window.location.href = 'metodosInventario/agregarProducto.html';
+        }
+
+        function irModificar() {
+            if (!Permisos.verificarOBloquear(Permisos.NIVELES.MODIFICAR, 'Modificar Producto')) return;
+            window.location.href = 'metodosInventario/buscarProducto.html';
+        }
+    </script>
 
 </body>
 </html>

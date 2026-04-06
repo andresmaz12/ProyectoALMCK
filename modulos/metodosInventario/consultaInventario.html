@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista de Base de Datos</title>
+    <link rel="stylesheet" href="estiloInventario.css">
+</head>
+<body>
+
+<div class="main-container">
+    <h2>Inventario de Productos</h2>
+
+    <div class="header-tools">
+        <input type="text" id="campoBusqueda" class="search-box"
+               placeholder="Buscar por nombre, categoría o código...">
+        <button class="btn-search" onclick="filtrarTabla()">Buscar</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Stock</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+            <tr>
+                <td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
+                    Cargando inventario...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<a class="btn-salir" href="../inventario.html">Regresar</a>
+
+<script src="db.js"></script>
+<script src="permisos.js"></script>
+<script>
+    const campoBusqueda = document.getElementById('campoBusqueda');
+    const cuerpoTabla   = document.getElementById('cuerpoTabla');
+
+    campoBusqueda.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') filtrarTabla();
+    });
+
+    function renderTabla(productos) {
+        if (productos.length === 0) {
+            cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
+                No se encontraron productos</td></tr>`;
+            return;
+        }
+
+        const puedeEditar = Permisos.puedeModificar();
+        const puedeEliminar = Permisos.puedeEliminar();
+
+        cuerpoTabla.innerHTML = productos.map(p => `
+            <tr>
+                <td>#${p.id}</td>
+                <td>${p.nombre}</td>
+                <td><span class="badge">${p.categoria}</span></td>
+                <td>${p.stock} unidades</td>
+                <td>Q${p.precio.toFixed(2)}</td>
+                <td class="acciones-celda">
+                    ${puedeEditar
+                        ? `<a href="modificarProducto.html?id=${p.id}" class="edit-link">Editar</a>`
+                        : `<span class="edit-link disabled" title="Sin permisos">Editar</span>`
+                    }
+                    ${puedeEliminar
+                        ? `<a href="#" class="delete-link" onclick="eliminarProducto('${p.id}', '${p.nombre}'); return false;">Eliminar</a>`
+                        : ''
+                    }
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function cargarInventario() {
+        DB.obtenerTodos().then(renderTabla);
+    }
+
+    function filtrarTabla() {
+        const termino = campoBusqueda.value.trim();
+        if (!termino) {
+            cargarInventario();
+            return;
+        }
+        DB.buscarPorTermino(termino).then(renderTabla);
+    }
+
+    function eliminarProducto(id, nombre) {
+        if (!Permisos.verificarOBloquear(Permisos.NIVELES.ELIMINAR, 'Eliminar Producto')) return;
+
+        const confirmado = confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`);
+        if (!confirmado) return;
+
+        DB.eliminarProducto(id).then(res => {
+            if (res.ok) {
+                alert(`Producto "${nombre}" eliminado.`);
+                cargarInventario();
+            }
+        });
+    }
+
+    cargarInventario();
+</script>
+
+</body>
+</html>
