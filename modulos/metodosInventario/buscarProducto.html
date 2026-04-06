@@ -1,95 +1,132 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscar Producto para Modificar</title>
-    <link rel="stylesheet" href="estiloInventario.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscar Producto para Modificar</title>
+  <link rel="stylesheet" href="estiloInventario.css">
 </head>
 <body>
 
-    <div class="main-container">
-        <h2>Buscar Producto para Modificar</h2>
+  <div class="main-container">
+    <h2>Buscar Producto para Modificar</h2>
 
-        <div class="header-tools">
-            <input type="text" id="campoBusqueda" class="search-box"
-                   placeholder="Buscar por nombre, categoría o ID...">
-            <button class="btn-search" onclick="ejecutarBusqueda()">Buscar</button>
-        </div>
-
-        <table id="tablaResultados">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Stock</th>
-                    <th>Precio</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody id="cuerpoTabla">
-                <tr>
-                    <td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
-                        Escribe un término y presiona "Buscar"
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="header-tools">
+      <input type="text" id="campoBusqueda" class="search-box"
+             placeholder="Buscar por nombre...">
+      <button type="button" class="btn-search" id="btnBuscar">Buscar</button>
     </div>
 
-    <a class="btn-salir" href="../inventario.html">Regresar</a>
+    <table id="tablaResultados">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Producto</th>
+          <th>Tipo</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoTabla">
+        <tr>
+          <td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
+            Escribe un término y presiona "Buscar"
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-    <script src="db.js"></script>
-    <script src="permisos.js"></script>
-    <script>
-        const campoBusqueda = document.getElementById('campoBusqueda');
-        const cuerpoTabla   = document.getElementById('cuerpoTabla');
+  <a class="btn-salir" href="../inventario.html">Regresar</a>
 
-        campoBusqueda.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') ejecutarBusqueda();
+  <script src="permisos.js"></script>
+  <script type="module">
+    import { supabase } from '../../supabaseClient.js';
+
+    const campoBusqueda = document.getElementById('campoBusqueda');
+    const cuerpoTabla = document.getElementById('cuerpoTabla');
+    const P = window.Permisos;
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = String(text);
+      return div.innerHTML;
+    }
+
+    function formatPrice(price) {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN'
+      }).format(price);
+    }
+
+    campoBusqueda.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') ejecutarBusqueda();
+    });
+
+    document.getElementById('btnBuscar').addEventListener('click', ejecutarBusqueda);
+
+    async function ejecutarBusqueda() {
+      const termino = campoBusqueda.value.trim();
+      if (!termino) {
+        cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
+          Escribe un término y presiona "Buscar"</td></tr>`;
+        return;
+      }
+
+      cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
+        Buscando...</td></tr>`;
+
+      try {
+        const { data: resultados, error } = await supabase
+          .from('productos')
+          .select('*')
+          .ilike('NombreProducto', `%${termino}%`)
+          .order('ProductoID', { ascending: false });
+
+        if (error) {
+          cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#b91c1c; padding:40px 0;">
+            ${escapeHtml(error.message)}</td></tr>`;
+          return;
+        }
+
+        if (!resultados || resultados.length === 0) {
+          cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
+            No se encontraron productos para "${escapeHtml(termino)}"</td></tr>`;
+          return;
+        }
+
+        cuerpoTabla.innerHTML = resultados.map(p => `
+          <tr>
+            <td>#${p.ProductoID}</td>
+            <td>${escapeHtml(p.NombreProducto)}</td>
+            <td><span class="badge">${escapeHtml(p.TipoProducto)}</span></td>
+            <td>${p.Cantidad} unidades</td>
+            <td>${formatPrice(p.Precio)}</td>
+            <td>
+              <a href="#" class="edit-link"
+                 data-id="${p.ProductoID}">
+                Seleccionar
+              </a>
+            </td>
+          </tr>
+        `).join('');
+
+        cuerpoTabla.querySelectorAll('.edit-link').forEach((el) => {
+          el.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            const id = el.getAttribute('data-id');
+            if (!P.verificarOBloquear(P.NIVELES.MODIFICAR, 'Modificar Producto')) return;
+            window.location.href = `modificarProducto.html?id=${encodeURIComponent(id)}`;
+          });
         });
-
-        function ejecutarBusqueda() {
-            const termino = campoBusqueda.value.trim();
-            if (!termino) {
-                cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
-                    Escribe un término y presiona "Buscar"</td></tr>`;
-                return;
-            }
-
-            DB.buscarPorTermino(termino).then(resultados => {
-                if (resultados.length === 0) {
-                    cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
-                        No se encontraron productos para "${termino}"</td></tr>`;
-                    return;
-                }
-
-                cuerpoTabla.innerHTML = resultados.map(p => `
-                    <tr>
-                        <td>#${p.id}</td>
-                        <td>${p.nombre}</td>
-                        <td><span class="badge">${p.categoria}</span></td>
-                        <td>${p.stock} unidades</td>
-                        <td>Q${p.precio.toFixed(2)}</td>
-                        <td>
-                            <a href="#" class="edit-link"
-                               onclick="seleccionarProducto('${p.id}'); return false;">
-                                Seleccionar
-                            </a>
-                        </td>
-                    </tr>
-                `).join('');
-            });
-        }
-
-        function seleccionarProducto(id) {
-            if (!Permisos.verificarOBloquear(Permisos.NIVELES.MODIFICAR, 'Modificar Producto')) {
-                return;
-            }
-            window.location.href = `modificarProducto.html?id=${id}`;
-        }
-    </script>
+      } catch (err) {
+        cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#b91c1c; padding:40px 0;">
+          Error de conexión</td></tr>`;
+      }
+    }
+  </script>
 
 </body>
 </html>
