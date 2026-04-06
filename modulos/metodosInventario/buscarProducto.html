@@ -5,25 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buscar Producto para Modificar</title>
   <link rel="stylesheet" href="estiloInventario.css">
+  <style>
+    /* Estilos rápidos para que se vea bien mientras carga tu CSS */
+    .badge { background: #e5e7eb; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+    .edit-link { color: #2563eb; font-weight: bold; text-decoration: none; }
+    .edit-link:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
 
   <div class="main-container">
-    <h2>Buscar Producto para Modificar</h2>
+    <h2>🔍 Buscar Producto para Modificar</h2>
 
     <div class="header-tools">
-      <input type="text" id="campoBusqueda" class="search-box"
-             placeholder="Buscar por nombre...">
+      <input type="text" id="campoBusqueda" class="search-box" placeholder="Ej: Camisa, Perfume...">
       <button type="button" class="btn-search" id="btnBuscar">Buscar</button>
     </div>
 
-    <table id="tablaResultados">
+    <table id="tablaResultados" style="width:100%; border-collapse: collapse; margin-top: 20px;">
       <thead>
-        <tr>
+        <tr style="background: #f3f4f6; text-align: left;">
           <th>ID</th>
           <th>Producto</th>
-          <th>Tipo</th>
-          <th>Cantidad</th>
+          <th>Categoría</th>
+          <th>Stock</th>
           <th>Precio</th>
           <th>Acción</th>
         </tr>
@@ -31,102 +36,78 @@
       <tbody id="cuerpoTabla">
         <tr>
           <td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
-            Escribe un término y presiona "Buscar"
+            Escribe el nombre y presiona "Buscar"
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <a class="btn-salir" href="../inventario.html">Regresar</a>
+  <div style="margin-top: 20px; text-align: center;">
+    <a class="btn-salir" href="../inventario.html" style="color: #666;">← Regresar al Menú</a>
+  </div>
 
-  <script src="permisos.js"></script>
   <script type="module">
     import { supabase } from '../../supabaseClient.js';
 
     const campoBusqueda = document.getElementById('campoBusqueda');
     const cuerpoTabla = document.getElementById('cuerpoTabla');
-    const P = window.Permisos;
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = String(text);
-      return div.innerHTML;
-    }
 
     function formatPrice(price) {
-      return new Intl.NumberFormat('es-MX', {
-        style: 'currency',
-        currency: 'MXN'
-      }).format(price);
+      return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(price);
     }
 
-    campoBusqueda.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') ejecutarBusqueda();
-    });
-
+    campoBusqueda.addEventListener('keydown', (e) => { if (e.key === 'Enter') ejecutarBusqueda(); });
     document.getElementById('btnBuscar').addEventListener('click', ejecutarBusqueda);
 
     async function ejecutarBusqueda() {
       const termino = campoBusqueda.value.trim();
-      if (!termino) {
-        cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
-          Escribe un término y presiona "Buscar"</td></tr>`;
-        return;
-      }
+      if (!termino) return;
 
-      cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
-        Buscando...</td></tr>`;
+      cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px 0;">Buscando...</td></tr>`;
 
       try {
+        // IMPORTANTE: Ajuste de nombres de columnas y JOIN
         const { data: resultados, error } = await supabase
           .from('productos')
-          .select('*')
-          .ilike('NombreProducto', `%${termino}%`)
+          .select('*, tipos_producto(nombre)')
+          .ilike('nombreProducto', `%${termino}%`)
           .order('ProductoID', { ascending: false });
 
-        if (error) {
-          cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#b91c1c; padding:40px 0;">
-            ${escapeHtml(error.message)}</td></tr>`;
-          return;
-        }
+        if (error) throw error;
 
         if (!resultados || resultados.length === 0) {
-          cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding:40px 0;">
-            No se encontraron productos para "${escapeHtml(termino)}"</td></tr>`;
+          cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px 0;">No se encontró "${termino}"</td></tr>`;
           return;
         }
 
         cuerpoTabla.innerHTML = resultados.map(p => `
           <tr>
             <td>#${p.ProductoID}</td>
-            <td>${escapeHtml(p.NombreProducto)}</td>
-            <td><span class="badge">${escapeHtml(p.TipoProducto)}</span></td>
-            <td>${p.Cantidad} unidades</td>
-            <td>${formatPrice(p.Precio)}</td>
+            <td><strong>${p.nombreProducto}</strong></td>
+            <td><span class="badge">${p.tipos_producto?.nombre || 'S/N'}</span></td>
+            <td>${p.cantidadProducto}</td>
+            <td>${formatPrice(p.precioProducto)}</td>
             <td>
-              <a href="#" class="edit-link"
-                 data-id="${p.ProductoID}">
+              <button class="btn-seleccionar" 
+                      style="background:#10b981; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:4px;"
+                      onclick="irAEditar(${p.ProductoID})">
                 Seleccionar
-              </a>
+              </button>
             </td>
           </tr>
         `).join('');
 
-        cuerpoTabla.querySelectorAll('.edit-link').forEach((el) => {
-          el.addEventListener('click', (ev) => {
-            ev.preventDefault();
-            const id = el.getAttribute('data-id');
-            if (!P.verificarOBloquear(P.NIVELES.MODIFICAR, 'Modificar Producto')) return;
-            window.location.href = `modificarProducto.html?id=${encodeURIComponent(id)}`;
-          });
-        });
       } catch (err) {
-        cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#b91c1c; padding:40px 0;">
-          Error de conexión</td></tr>`;
+        console.error(err);
+        cuerpoTabla.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; padding:40px 0;">Error: ${err.message}</td></tr>`;
       }
     }
-  </script>
 
+    // Función global para redireccionar
+    window.irAEditar = (id) => {
+      window.location.href = `formularioEditar.html?id=${id}`;
+    };
+  </script>
 </body>
 </html>
