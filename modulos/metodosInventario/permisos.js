@@ -44,3 +44,5 @@ const Permisos = {
     return true;
   }
 };
+
+window.Permisos = Permisos;
