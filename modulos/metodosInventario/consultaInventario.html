@@ -157,7 +157,7 @@
   </footer>
 
   <script type="module">
-    import { supabase, testSupabaseConnection } from '../../supabaseClient.js';
+    import { supabase } from '../../supabaseClient.js';
 
     // Función para formatear moneda
     function formatPrice(price) {
@@ -229,13 +229,7 @@
           container.innerHTML = `<div class="loading">❌ Error: ${error.message}</div>`;
           return;
         }
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vista de Base de Datos</title>
-    <link rel="stylesheet" href="estiloInventario.css">
-</head>
-<body>
-
+    
         if (!data || data.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
